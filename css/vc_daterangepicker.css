@@ -1,0 +1,283 @@
+#calendar
+{
+	width: 200px;
+	position: relative;
+	z-index: 1;
+	margin: 0px 0px 5px 0;
+	float: left;
+	top: -8px;
+}
+
+#calendar > form
+{
+	position: relative;
+}
+
+#calendarField
+{
+	margin-top: 5px;
+	width: 200px;
+	height: 27px;
+	position: relative;
+	z-index: 30;
+}
+
+#calendarField input.date
+{
+	font-size: 12px;
+	font-weight: bold;
+	font-family: Arial, sans-serif;
+	color: #000;
+	height: 23px;
+	line-height: 26px;
+	left: 0px;
+	width: 170px;
+	text-align: center;
+	background: #fff;
+	border: 1px solid #ddd;
+	-webkit-border-radius: 3px 0 0 3px;
+	-moz-border-radius: 3px 0 0 3px;
+	border-radius: 3px 0 0 3px;
+	z-index: 30;
+}
+
+#calendarArea input[type="submit"]
+{
+	margin-top: -3px;
+	padding-bottom: 4px;
+	font-weight: bold;
+	color: #fff;
+	border: 1px solid #ececec;
+	background: #3fa2eb;
+	background-image: linear-gradient(bottom, rgb(1,123,204) 1%, rgb(43,166,248) 64%);
+	background-image: -o-linear-gradient(bottom, rgb(1,123,204) 1%, rgb(43,166,248) 64%);
+	background-image: -moz-linear-gradient(bottom, rgb(1,123,204) 1%, rgb(43,166,248) 64%);
+	background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0.01, rgb(1,123,204)), color-stop(0.64, rgb(43,166,248)));
+	background-image: -webkit-linear-gradient(bottom, rgb(1,123,204) 1%, rgb(43,166,248) 64%);
+	background-image: -ms-linear-gradient(bottom, rgb(1,123,204) 1%, rgb(43,166,248) 64%);
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
+	height: 28px;
+	-moz-background-clip: padding;
+	-webkit-background-clip: padding-box;
+	background-clip: padding-box;
+}
+
+#calendarField i {
+	position: absolute;
+	top: 0;
+	right: 0;
+}
+
+#calendarField i.fa-calendar {
+	background-color: #fff;
+	padding: 6px 0 0 7px;
+	width: 24px;
+	height: 19px;
+	border: 1px solid #ddd;
+	-webkit-border-radius: 0 3px 3px 0;
+	-moz-border-radius: 0 3px 3px 0;
+	border-radius: 0 3px 3px 0;
+	z-index: 30;
+	right: -2px;
+	cursor: pointer;
+}
+
+#calendarArea {
+	position: absolute;
+	top: -10px;
+	left: -10px;
+	height: 0px;
+	overflow: hidden;
+	width: 870px;
+	background-color: #e4e9ed;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
+	z-index: 20;
+	-webkit-box-shadow: 0px 0px 4px 0px #000;
+	-moz-box-shadow: 0px 0px 4px 0px #000;
+	box-shadow: 0px 0px 4px 0px #000;
+}
+
+#calendarArea .datepicker {
+	position: absolute;
+	background-color: #fff;
+	bottom: 0;
+	top: auto;
+}
+
+#calendarArea table a {
+	color: #000;
+}
+
+#calendarArea .datepickerDoW span {
+	color: #fff;
+}
+
+#calendarArea .datepickerMonth a {
+	font-weight: bold;
+}
+
+#calendarArea .datepicker .datepickerNotInMonth a,
+#calendarArea .datepicker .datepickerDisabled a {
+	color: #ccc;
+}
+
+#calendarArea .datepickerSpace {
+	background-color: #fff;
+}
+
+#calendarArea table {
+	background-color: #fff;
+	border: none;
+	padding: 0;
+}
+
+#calendarArea table td,
+#calendarArea table th {
+	padding: 0;
+	border: none;
+}
+
+#calendarArea table .datepickerDoW {
+	background-color: #979797;
+}
+#calendarArea table .datepickerDoW th {
+	text-align:	center;
+	font-weight: bold;
+	text-align: baseline;
+	padding: 8px 4px;
+}
+
+#calendarArea table .datepickerWeek a {
+	cursor: pointer;
+	background-color: #e4e9ed;
+}
+#calendarArea .datepickerDays a:hover {
+	background-color: #979797;
+	color: #fff;
+}
+
+#calendarArea table .datepickerDays td {
+	border: 1px dotted #ddd;
+}
+#calendarArea table.datepickerViewDays td:nth-child(2) {
+	border-left: none;
+}
+#calendarArea table.datepickerViewDays td:last-child {
+	border-right: none;
+}
+#calendarArea table.datepickerViewDays tr:last-child td {
+	border-bottom: none;
+}
+#calendarArea table.datepickerViewDays tr:first-child td {
+	border-top: none;
+}
+#calendarArea .datepickerSelected {
+	background: #38bbda;
+}
+#calendarArea .datepickerSelected a {
+	color: #fff;
+}
+
+#calendarArea > div {
+	margin-top: 12px;
+	float: right;
+}
+#calendarArea > div > input,
+#calendarArea .selectDropdown {
+	float: left;
+	margin-right: 5px;
+}
+#calendarArea > div > input {
+	margin-right: 10px;
+}
+#calendarArea .selectDropdown dt a {
+	padding: 4px 6px 5px;
+	font: 99% sans-serif;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+
+#calendarArea .datepickerBorderT,
+#calendarArea .datepickerBorderR,
+#calendarArea .datepickerBorderB,
+#calendarArea .datepickerBorderL,
+#calendarArea .datepickerBorderTL,
+#calendarArea .datepickerBorderTR,
+#calendarArea .datepickerBorderBL,
+#calendarArea .datepickerBorderBR {
+	background-image: none;
+}
+
+#calendarArea .datepickerDays a {
+	width: 33px;
+	line-height: 33px;
+	height: 33px;
+	padding-right: 0;
+	text-align:	center;
+}
+
+#calendarArea #customFields {
+	margin: 10px 20px 0 0;
+}
+
+#customFields input {
+	padding: 4px 6px;
+	color: #666;
+	border: 1px solid #ddd;
+	width: 75px;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+#customFields span {
+	display: block;
+	float: left;
+}
+#customFields span.text {
+	margin-top: 5px;
+	padding: 0 5px;
+	font-weight: bold;
+}
+
+#calendarArea .datepickerContainer > table > tbody > tr > td:not(:last-child) .datepickerGoNext a,
+#calendarArea .datepickerContainer > table > tbody > tr > td:not(:first-child) .datepickerGoPrev a {
+	display: none;
+}
+#calendarArea .datepickerContainer > table > tbody > tr > td .datepickerGoNext a,
+#calendarArea .datepickerContainer > table > tbody > tr > td .datepickerGoPrev a {
+	cursor: pointer;
+}
+
+/* Single mode */
+#calendar.single {
+	width: 145px;
+}
+#calendar.single #calendarArea > div.submitArea {
+	float: left;
+	margin-left: 166px;
+}
+#calendar.single #calendarField {
+	width: 145px;
+}
+#calendar.single #calendarField input.date {
+	width: 114px;
+}
+#calendarField i.arrowLeft,
+#calendarField i.arrowRight {
+	top: 3px;
+	width: 5px;
+	padding: 4px 7px;
+	z-index: 35;
+	cursor: pointer;
+}
+#calendarField i.arrowLeft {
+	left: 0px;
+}
+#calendarField i.arrowRight {
+	right: 30px;
+}

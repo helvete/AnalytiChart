@@ -1,0 +1,23 @@
+{
+	"name": "argo22/AnalyticChart",
+	"description": "Multidimensional analytic chart with related table",
+	"keywords": ["javascript", "php", "data visualisation"],
+	"homepage": "https://github.com/helvete/AnalyticChart",
+	"authors":[
+		{
+			"name": "Aleš Tomeček",
+			"homepage": "https://github.com/Tezar"
+		},
+		{
+			"name": "helvete",
+			"homepage": "https://github.com/helvete"
+		},
+		{
+			"name": "ARGO22",
+			"homepage": "http://argo22.com"
+		}
+	],
+	"support": {
+		"issues": "https://github.com/helvete/AnalyticChart/issues"
+	}
+}

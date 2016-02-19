@@ -1,0 +1,70 @@
+.analyticChartContainer {
+	padding: 30px 30px 15px 30px;
+	background-color: #ffffff;
+}
+.analyticChartContainer .analyticChartOptions {
+	padding: 0 0 20px 0;
+}
+.analyticChartContainer .metricSelection {
+	float: left;
+}
+.analyticChartContainer .metricSelection > span {
+	float: left;
+	padding: 0 5px;
+}
+.analyticChartContainer .plottingSelection {
+	float: right;
+}
+.analyticChartContainer .plottingSelection ul {
+	margin: 0;
+	list-style-type: none;
+}
+.analyticChartContainer .plottingSelection ul li {
+	display: block;
+	float: left;
+	margin: 0;
+	padding: 8px 10px;
+	border: 1px solid #e4e4e4;
+	cursor: pointer;
+	background: #ffffff; /* Old browsers */
+	background: -moz-linear-gradient(top,  #ffffff 0%, #ffffff 1%, #ffffff 50%, #e4e4e4 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(1%,#ffffff), color-stop(50%,#ffffff), color-stop(100%,#e4e4e4)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #ffffff 0%,#ffffff 1%,#ffffff 50%,#e4e4e4 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #ffffff 0%,#ffffff 1%,#ffffff 50%,#e4e4e4 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #ffffff 0%,#ffffff 1%,#ffffff 50%,#e4e4e4 100%); /* IE10+ */
+	background: linear-gradient(to bottom,  #ffffff 0%,#ffffff 1%,#ffffff 50%,#e4e4e4 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e4e4e4',GradientType=0 ); /* IE6-9 */
+}
+.analyticChartContainer .plottingSelection ul li.selected,
+.analyticChartContainer .plottingSelection ul li:hover {
+	background: #ffffff; /* Old browsers */
+	background: -moz-linear-gradient(top,  #ffffff 0%, #e4e4e4 0%, #ffffff 50%, #ffffff 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(0%,#e4e4e4), color-stop(50%,#ffffff), color-stop(100%,#ffffff)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #ffffff 0%,#e4e4e4 0%,#ffffff 50%,#ffffff 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #ffffff 0%,#e4e4e4 0%,#ffffff 50%,#ffffff 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #ffffff 0%,#e4e4e4 0%,#ffffff 50%,#ffffff 100%); /* IE10+ */
+	background: linear-gradient(to bottom,  #ffffff 0%,#e4e4e4 0%,#ffffff 50%,#ffffff 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#ffffff',GradientType=0 ); /* IE6-9 */
+}
+.analyticChartContainer .plottingSelection ul li:first-child {
+	border-right: 0;
+	border-bottom-left-radius: 3px;
+	border-top-left-radius: 3px;
+}
+.analyticChartContainer .plottingSelection ul li:last-child {
+	border-left: 0;
+	border-bottom-right-radius: 3px;
+	border-top-right-radius: 3px;
+}
+.analyticChart .c3-line-primary {
+  stroke-width: 3px;
+}
+.analyticChartContainer .selectDropdown {
+	width: 242px;
+}
+.analyticChartContainer .selectDropdown dd ul {
+	width: 219px;
+}
+.analyticChartContainer .selectDropdown dd .optionContainer {
+	min-width: 240px;
+}
