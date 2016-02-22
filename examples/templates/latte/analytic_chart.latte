@@ -1,0 +1,145 @@
+{var $structure = $chart->generateStructure()}
+<div id="{$structure['identifier']}-container" class="analyticChartContainer">
+	<div class="analyticChartOptions clearfix">
+		{if !empty($structure['metrics'])}
+		<div class="metricSelection"
+			{*We have to hide it instead ommiting entirely, because JScript
+			depends on values this block provides*}
+			{if ! $chart->shouldShowMetricPicker()}style='display:none'{/if}>
+			<span>
+			<select name="{\Argo22\AnalyticChart\Chart::PRIMARY_METRIC_KEY}">
+			{foreach $structure['metrics'] as $key => $setting}
+				<option value="{$key}"{if $structure['selectedPrimaryMetricKey'] == $key} selected="selected"{/if}>{$setting['caption']}</option>
+			{/foreach}
+			</select>
+			</span>
+			<span> vs. </span>
+			<span>
+			<select name="{\Argo22\AnalyticChart\Chart::SECONDARY_METRIC_KEY}">
+				<option value="">Select metric</option>
+			{foreach $structure['metrics'] as $key => $setting}
+				<option value="{$key}"{if $structure['selectedSecondaryMetricKey'] == $key} selected="selected"{/if}>{$setting['caption']}</option>
+			{/foreach}
+			</select>
+			</span>
+		</div>
+		{/if}
+		<div class="plottingSelection"
+			{if ! $chart->shouldShowLod()}style='display:none'{/if}>
+			<ul>
+				{if $chart->isLodLevelEnabled('hour')}<li data-value="hour"{if $structure['lod'] == 'hour'} class="selected"{/if}>Hour</li>{/if}
+				{if $chart->isLodLevelEnabled('day')}<li data-value="day"{if empty($structure['lod']) || $structure['lod'] == 'day'} class="selected"{/if}>Day</li>{/if}
+				{if $chart->isLodLevelEnabled('week')}<li data-value="week"{if $structure['lod'] == 'week'} class="selected"{/if}>Week</li>{/if}
+				{if $chart->isLodLevelEnabled('month')}<li data-value="month"{if $structure['lod'] == 'month'} class="selected"{/if}>Month</li>{/if}
+			</ul>
+		</div>
+	</div>
+
+	<div id="{$structure['identifier']|noescape}" class="analyticChart"></div>
+</div>
+
+<script type="text/javascript">
+var analyticChart_{$structure['identifier']|noescape} = $.analyticChart.create({
+	'identifier': {$structure['identifier']},
+	'container': $('#' + {$structure['identifier']} + '-container'),
+	{if !empty($structure['tableIdentifier'])}
+	'tableIdentifier': 'analyticTable_{$structure['tableIdentifier']}',
+	{/if}
+	'metrics': {json_encode($structure['metrics'])|noescape},
+	'shadowMetrics': {json_encode($structure['shadowMetrics'])|noescape},
+	'primary_metric_key': {\Argo22\AnalyticChart\Chart::PRIMARY_METRIC_KEY},
+	'secondary_metric_key': {\Argo22\AnalyticChart\Chart::SECONDARY_METRIC_KEY},
+	'chartSettings': {
+		bindto: '#{$structure['identifier']|noescape}',
+		data: {
+			x: {\Argo22\AnalyticChart\Chart::X_AXIS_KEY},
+			// always expect datetime including hours
+			xFormat: '%Y-%m-%d %H:%M:%S',
+			columns: [],
+			axes: {
+				{\Argo22\AnalyticChart\Chart::PRIMARY_METRIC_KEY}: 'y',
+				{\Argo22\AnalyticChart\Chart::SECONDARY_METRIC_KEY}: 'y2'
+				{foreach $structure['shadowMetrics'] as $metric}
+				,{$metric}: 'y2'
+				{/foreach}
+			},
+			types: {
+				{foreach $structure['lineTypes'] as $metric => $type}
+				{$metric}: {$type},
+				{/foreach}
+			},
+			colors: {
+				{foreach $structure['shadowMetrics'] as $metric}
+				{$metric}: '#d2d2d2',
+				{/foreach}
+			}
+		},
+		{if $structure['colorPattern']|@count > 0}
+		color: {
+			pattern: [{implode('\', \'', $structure['colorPattern'])}]
+		},
+		{/if}
+		point: {
+			r : {number_format($structure['pointSize'],5,".","")}
+		},
+		{if $structure['showGridLines']}
+		grid: {
+			y: {
+				show: true
+			}
+		},
+		{/if}
+		axis: {
+			x: {
+				type: 'timeseries',
+				tick: {
+					format: function (d) {
+						var chart = analyticChart_{$structure['identifier']|noescape};
+						return chart.formatDate(d);
+					}
+				}
+			},
+			y : {
+				tick: {
+					format: function (d) {
+						if (analyticChart_{$structure['identifier']|noescape}) {
+							return analyticChart_{$structure['identifier']|noescape}._formatMetric(d, {\Argo22\AnalyticChart\Chart::PRIMARY_METRIC_KEY});
+						};
+
+						return d;
+					}
+				}
+			},
+			y2: {
+				show: false,
+				padding: { top: 0, bottom: 0 },
+				tick: {
+					format: function(d) {
+						if (analyticChart_{$structure['identifier']|noescape}) {
+							return analyticChart_{$structure['identifier']|noescape}._formatMetric(d, {\Argo22\AnalyticChart\Chart::SECONDARY_METRIC_KEY});
+						};
+						return d;
+					}
+				}
+			}
+		},
+		{if $structure['regions']|@count > 0}
+		regions: {json_encode($structure['regions'])|noescape},
+		{/if}
+		{if $structure['zoomEnabled']}
+		zoom: {
+			enabled: true
+		},
+		{/if}
+		tooltip: {
+			format: {
+				title: function (d) {
+					// in hour granularity, hours should be displayed
+					var chart = analyticChart_{$structure['identifier']|noescape};
+					return chart.formatDate(d, true);
+				}
+			}
+		}
+	}
+});
+</script>

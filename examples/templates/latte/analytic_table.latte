@@ -1,0 +1,126 @@
+{var $structure = $table->generateStructure()}
+<div id="{$structure['identifier']}-container" class="analyticTableContainer">
+	<div class="analyticTableOptions clearfix">
+		{if !empty($structure['primaryDimensions'])}
+		<div class="primaryDimension clearfix">
+			<ul>
+				<li>Primary dimension:</li>
+				{foreach $structure['primaryDimensions'] as $key => $dimension}
+					<li data-value="{$key}"{if $structure['selectedPrimaryDimensionKey'] == $key} class="selected"{/if}>{$dimension['caption']}<i></i><i></i></li>
+				{/foreach}
+			</ul>
+		</div>
+		{/if}
+		{if !empty($structure['secondaryDimensions'])}
+		<div class="secondaryDimension clearfix">
+			{if $structure['selectedSecondaryDimensionKey'] != ''}
+			<div class="secondaryDimensionButton">{$structure['selectedSecondaryDimension']['caption']}<i class="fa fa-times">&nbsp;</i></div>
+			{else}
+			<div class="secondaryDimensionButton">Secondary dimension<i class="fa fa-chevron-down">&nbsp;</i></div>
+			{/if}
+			<select name="secondary_dimension">
+				<option value="">Select an item...</option>
+				{foreach $structure['secondaryDimensions'] as $key => $dimension}
+					<option value="{$key}"{if $structure['selectedSecondaryDimensionKey'] == $key} selected="selected"{/if}>{$dimension['caption']}</option>
+				{/foreach}
+			</select>
+		</div>
+		{/if}
+	</div>
+
+	<div class="clearfix">
+		<table id="{$structure['identifier']}" class="analyticTable">
+			<thead>
+				<tr class="names">
+					<th></th>
+					<th class="primary">{$structure['selectedPrimaryDimension']['caption']}<i class="fa fa-lg">&nbsp;</i></th>
+					<th class="secondary">{if !empty($structure['selectedSecondaryDimension'])}{$structure['selectedSecondaryDimension']['caption']}{/if}<i class="fa fa-lg">&nbsp;</i></th>
+					{foreach $structure['columns'] as $key => $column}
+					<th {if ! empty($column['description'])} title='{$column['description']}' class='tooltip'{/if}>
+					<span{if ! empty($column['description'])} style='border-bottom: 1px dashed #444;'{/if}>{$column['caption']}</span><i class="fa fa-lg">&nbsp;</i></th>
+					{/foreach}
+				</tr>
+				<tr class="summary">
+					<th></th>
+					<th></th>
+					<th></th>
+					{foreach $structure['columns'] as $key => $column}
+					<th class="{$key} sorting_disabled"></th>
+					{/foreach}
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+	</div>
+</div>
+
+<script type="text/javascript">
+// uncheck table row checkboxes on changing metric types or LODs
+// (these reset row visualizations anyway)
+var resetFu = function(){
+	$('div.analyticTableContainer table.analyticTable td.checkboxRow input[type=checkbox]').prop('checked', false);
+}
+$('div.analyticChartContainer div.metricSelection select').change(resetFu);
+$('div.analyticChartContainer div.plottingSelection li:not(.selected)').click(resetFu);
+var analyticTable_{$structure['identifier']|noescape} = $.analyticTable.create({
+	'identifier': {$structure['identifier']},
+	'container': $('#' + {$structure['identifier']} + '-container'),
+	{if !empty($structure['chartIdentifier'])}
+	'chart': analyticChart_{$structure['chartIdentifier']|noescape},
+	{/if}
+	'primary_dimension_key': {\Argo22\AnalyticChart\Table::PRIMARY_DIMENSION_KEY},
+	'secondary_dimension_key': {\Argo22\AnalyticChart\Table::SECONDARY_DIMENSION_KEY},
+	'columns': {json_encode($structure['columns'])|noescape},
+	'table': $('table#{$structure['identifier']|noescape}').DataTable({
+		columns: [
+			{ data: {\Argo22\AnalyticChart\Table::CHECKBOX_COLUMN_KEY}, width: '20px', orderable: false},
+			{ data: {\Argo22\AnalyticChart\Table::PRIMARY_DIMENSION_KEY} },
+			{ data: {\Argo22\AnalyticChart\Table::SECONDARY_DIMENSION_KEY} }
+			{foreach $structure['columns'] as $key => $column}
+			,{ data: {$key}, class: {strtolower($key)} }
+			{/foreach}
+		],
+		// format metric value
+		columnDefs: [
+			{foreach $structure['columns'] as $key => $column}
+			{
+				targets: {$iterator->counter + 1},
+				orderSequence: ['desc', 'asc'],
+				createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
+					var formatted = $.metricFormats.formatByType(cellData, {$column['type']});
+					$(cell).addClass('align{ucfirst(strtolower($column['align']))}').html(formatted);
+				}
+			}{if $iterator->counter != count($structure['columns'])},{/if}
+			{/foreach}
+		],
+		order: [[ 3, 'desc' ]],
+		bSortCellsTop: true,
+		// (p)aging - (i)nfo - (l)isting
+		sDom: '<"top">rt<"bottom"pil><"clear">',
+		oLanguage: {
+			sEmptyTable: "No records found",
+			sInfoEmpty: "No records found",
+			sLoadingRecords: "Loading entries...",
+			sZeroRecords: "No records found",
+			sLengthMenu: 'Items count per page <select>' +
+				'<option value="10">10</option>' +
+				'<option value="20">20</option>' +
+				'<option value="30">30</option>' +
+				'<option value="40">40</option>' +
+				'<option value="50">50</option>' +
+				'<option value="-1">All</option>' +
+				'</select>',
+			oPaginate: {
+				sNext: "Next",
+				sPrevious: "Previous"
+			},
+			sInfo: "Rows _START_ - _END_ of _TOTAL_"
+		},
+		// creates checkboxes in the first coulmn
+		createdRow: function(row, data, index) {
+			analyticTable_{$structure['identifier']|noescape}._createRowSelector(row, index);
+		},
+		autoWidth: false
+	})
+});
+</script>

@@ -1,0 +1,256 @@
+{var $structure = $dateRangePicker->generateStructure()}
+<div id="calendar" class="calendarAreaBlock {$structure['mode']}">
+	<form id="dateRange" name="dateRange" method="post" action="{$structure['actionLink']}">
+		<div id="calendarField">
+			{if $structure['mode'] == "single"}
+				<i class="fa fa-caret-left arrowLeft"></i>
+			{/if}
+			<label>
+				<input type="text" value="{$structure['initialDateRange']}" name="dateRange" readonly="readonly" class="date" />
+			</label>
+			{if $structure['mode'] == "single"}
+				<i class="fa fa-caret-right arrowRight"></i>
+			{/if}
+			<i class="fa fa-calendar fa-lg"></i>
+		</div>
+		<div id="calendarArea">
+			<div class="submitArea clearfix">
+				{if !empty($structure['definedRange']) && $structure['mode'] == "range"}
+					<select>
+						<option value="custom">Custom</option>
+					{foreach $structure['definedRange'] as $range}
+						{if !isset($range['disabled']) || !$range['disabled']}
+						<option value="{$range['value']}">{$range['label']}</option>
+						{/if}
+					{/foreach}
+					</select>
+				{/if}
+				<input type="submit" value="Change" />
+			</div>
+			{if $structure['mode'] == "range"}
+			<div id="customFields">
+				<span class="text">Enter dates</span>
+				<input type="text" name="dateFrom" class="daterange" id="dFrom"
+					value="{$structure['currentDateRange']['startDate']}{*|date_format:$structure['dateEntryFormat']['smarty']*}" />
+				<span class="text">to</span>
+				<input type="text" name="dateTo" class="daterange" id="dTo"
+					value="{$structure['currentDateRange']['endDate']}{*|date_format:$structure['dateEntryFormat']['smarty']*}" />
+			</div>
+			{/if}
+		</div>
+	</form>
+</div>
+
+<script type="text/javascript">
+$(function() {
+	{if !empty($structure['minDate'])}
+		var minDate = new Date({$structure['minDate']});
+	{else}
+		var minDate = null;
+	{/if}
+	{if !empty($structure['maxDate'])}
+		var maxDate = new Date({$structure['maxDate']});
+	{else}
+		var maxDate = null;
+	{/if}
+
+	{if $structure['mode'] == "range"}
+	/**
+	 * Daterange picker - mode "range"
+	 */
+	$('#calendarArea').DatePicker({
+		format: 'd b Y',
+		flat: true,
+		date: [new Date({$structure['currentDateRange']['startDate']}), new Date({$structure['currentDateRange']['endDate']})],
+		calendars: 3,
+		mode: 'range',
+		onChange: function(formatted, dates) {
+			var date_range = "";
+
+			// set selected values to the custom inputs
+			$('#dFrom').dateEntry('setDate', dates[0]);
+			$('#dTo').dateEntry('setDate', dates[1]);
+
+			// check if date range is just one day
+			if (formatted[0] == formatted[1]) {
+				formatted[1] = "";
+				date_range = formatted[0];
+			} else {
+				date_range = formatted.join(' - ');
+			}
+
+			// change the text field given the chosen date range
+			$('#dateRange input.date').val(date_range);
+
+			// reset predefined date range to custom
+			$("#dateRange select").val("custom");
+			if ($("#dateRange select").siblings('.selectDropdown').length != 0) {
+				$("#dateRange select").siblings('.selectDropdown').find('dt')
+					.find('a').html('Custom<span class="value">custom</span><i class="arrowDown fa fa-chevron-down"></i>');
+			}
+			$('#customFields').show();
+		},
+		{if !empty($structure['minDate']) || !empty($structure['maxDate'])}
+		onRender: function(date) {
+			/* !!! DateEntry library normalize all dates to 12PM (noon)
+			 * Set hours back to 12AM for minDate to match date range limits
+			 */
+			if (minDate != null) {
+				minDate.setHours(0,0,0,0);
+			}
+
+			minCond = (minDate == null) ? false : date.valueOf() < minDate.valueOf();
+			maxCond = (maxDate == null) ? false : date.valueOf() > maxDate.valueOf();
+			return {
+				// disable unavailable dates
+				disabled: (minCond || maxCond),
+			}
+		},
+		{/if}
+	});
+
+	/**
+	 * Field settings function to create a date range control
+	 *  - two date fields, each restricting the other
+	 */
+	function customRange(input) {
+		return { minDate: (input.id == 'dTo' ?
+			$('#dFrom').dateEntry('getDate') : minDate),
+			maxDate: (input.id == 'dFrom' ?
+			$('#dTo').dateEntry('getDate') : maxDate)};
+	}
+
+	// add date entry to the custom inputs
+	$("#customFields input.daterange").dateEntry({
+		beforeShow: customRange,
+		spinnerImage: '',
+		dateFormat: {$structure['dateEntryFormat']['entry']},
+		minDate: minDate,
+		maxDate: maxDate,
+		initialField: {$structure['dateEntryFormat']['initial']},
+	});
+
+	// select date range change action
+	$("#dateRange select").change(function () {
+		var selected = 	$("#dateRange select option:selected").val();
+		var date_range = "";
+
+		// show/hide custom range fields
+		if (selected != "custom") {
+			$('#customFields').hide();
+		} else {
+			$('#customFields').show();
+		}
+
+		// clear range limitation
+		$('#dFrom').dateEntry('change', maxDate, null );
+		$('#dTo').dateEntry('change', minDate, null);
+
+		{foreach $structure['definedRange'] as $range}
+		if (selected == {$range['value']} ) {
+			$('#calendarArea').DatePickerSetDate([new Date({$range['startDate']}), new Date({$range['endDate']})], true);
+			{if $range['value'] == "yesterday"}
+				date_range = {$range['startDate']};
+			{else}
+				date_range = "{$range['startDate']|noescape} - {$range['endDate']|noescape}";
+			{/if}
+			// set date entry values
+			$('#dFrom').dateEntry('setDate', new Date({$range['startDate']}));
+			$('#dTo').dateEntry('setDate', new Date({$range['endDate']}));
+		}
+		{/foreach}
+
+		$('#dateRange input.date').val(date_range);
+	});
+
+	// handle date entry change action
+	$("#customFields input.daterange").change(function () {
+		if ($(document.activeElement).parents().hasClass('dateEntry_wrap')) {
+			var startDate = $('#dFrom').dateEntry('getDate');
+			var endDate = $("#dTo").dateEntry('getDate');
+
+			$('#calendarArea').DatePickerSetDate([startDate, endDate], true);
+
+			date_range = $('#calendarArea').DatePickerGetDate(true).toString();
+
+			$('#dateRange input.date').val(date_range.replace(',',' - '));
+		}
+	});
+	{else}
+	/**
+	 * Daterange picker - mode "single"
+	 */
+	$('#calendarArea').DatePicker({
+		format: 'd b Y',
+		flat: true,
+		date: new Date({$structure['currentDateRange']['startDate']}),
+		calendars: 3,
+		mode: 'single',
+		onChange: function(formated) {
+			// change the text field given the chosen date range
+			$('#dateRange input.date').val(formated);
+		},
+		{if !empty($structure['minDate']) || !empty($structure['maxDate'])}
+		onRender: function(date) {
+			minCond = (minDate == null) ? false : date.valueOf() < minDate.valueOf();
+			maxCond = (maxDate == null) ? false : date.valueOf() > maxDate.valueOf();
+			return {
+				// disable unavailable dates
+				disabled: (minCond || maxCond),
+			}
+		},
+		{/if}
+	});
+	var actualDate = new Date({$structure['currentDateRange']['startDate']});
+
+	// hide arrow buttons if reach date range picker limits
+	if (actualDate.getTime() >= maxDate.getTime()) {
+		$("#calendarField i.arrowRight").addClass('off').hide();
+	} else if (actualDate.getTime() <= minDate.getTime()) {
+		$("#calendarField i.arrowLeft").addClass('off').hide();
+	}
+
+	// bind actions for shifting days via arrow buttons
+	$("#calendarField i.arrowLeft").on('click', function() {
+		var newDate = new Date(actualDate.getFullYear(), actualDate.getMonth(), actualDate.getDate() - 1);
+		var newDateString = ('0'+newDate.getDate()).substr(-2) + ' ' + newDate.toDateString().substr(4,3) + ' ' + newDate.getFullYear();
+		$('#dateRange input.date').val(newDateString);
+		$(this).off('click');
+		document.dateRange.submit();
+	});
+	$("#calendarField i.arrowRight").on('click', function(e) {
+		var newDate = new Date(actualDate.getFullYear(), actualDate.getMonth(), actualDate.getDate() + 1);
+		var newDateString = ('0'+newDate.getDate()).substr(-2) + ' ' + newDate.toDateString().substr(4,3) + ' ' + newDate.getFullYear();
+		$('#dateRange input.date').val(newDateString);
+		$(this).off('click');
+		document.dateRange.submit();
+	});
+	{/if}
+
+	// show/hide date range picker when calendar icon is clicked
+	var state = true;
+	$("#calendarField > i.fa-calendar").on('click', function() {
+		$("#calendarArea").animate({
+				height: state ?  "320px" : "0px"
+		}, 500);
+		$("#calendarField i.arrowLeft:not(.off)").toggle();
+		$("#calendarField i.arrowRight:not(.off)").toggle();
+		state = !state;
+	});
+
+	// hide date range picker when clicked outside of its area
+	$(document).bind('mousedown', function(e) {
+		if (!state) {
+			var $clicked = $(e.target);
+			if (! $clicked.parents().hasClass("calendarAreaBlock")) {
+				$("#calendarArea").animate({
+					height: "0px"
+				}, 500)
+				state = true;
+				$("#calendarField i.arrowLeft:not(.off)").show();
+				$("#calendarField i.arrowRight:not(.off)").show();
+			}
+		}
+	});
+});
+</script>

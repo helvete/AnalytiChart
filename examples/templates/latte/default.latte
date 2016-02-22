@@ -1,0 +1,25 @@
+{block content}
+<br />
+
+<div id="statisticsHeader" class="clearfix">
+	<h1>Statistics</h1>
+	<div class="dateRangePickerWrapper">
+		{include 'date_range_picker.latte'}
+	</div>
+</div>
+
+<div class="tabControl clearfix">
+	<ul class="tabs">
+		{foreach $menu as $key => $label}
+			<li{if $key === $activeMenuItem} class="active"{/if}><a href="{*TODO: link*}">{$label}</a></li>
+		{/foreach}
+	</ul>
+</div>
+
+<div class="box clearfix">
+	{include 'analytic_chart.latte', chart => $analyticChart}
+</div>
+
+<div class="box">
+	{include 'analytic_table.latte', table => $analyticTable}
+</div>
