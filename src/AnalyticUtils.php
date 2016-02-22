@@ -19,7 +19,7 @@ class Utils
 	 */
 	static public function truncateDate($date, $type)
 	{
-		$d = new Datetime($date);
+		$d = new \Datetime($date);
 
 		switch ($type) {
 		case 'hour':
@@ -39,7 +39,7 @@ class Utils
 			return $d->format('Y-m-01');
 
 		default:
-			throw new Exception("Invalid date type '{$type}'");
+			throw new \Exception("Invalid date type '{$type}'");
 		}
 	}
 }
