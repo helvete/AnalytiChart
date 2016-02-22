@@ -55,6 +55,7 @@
 </div>
 
 <script type="text/javascript">
+$(document).ready(function(){
 // uncheck table row checkboxes on changing metric types or LODs
 // (these reset row visualizations anyway)
 var resetFu = function(){
@@ -120,7 +121,10 @@ var analyticTable_{$structure['identifier']|noescape} = $.analyticTable.create({
 		createdRow: function(row, data, index) {
 			analyticTable_{$structure['identifier']|noescape}._createRowSelector(row, index);
 		},
-		autoWidth: false
+		autoWidth: false,
+		// important for compatibility with jquery version >= 1.10.x !!
+		filter: false
 	})
+});
 });
 </script>
