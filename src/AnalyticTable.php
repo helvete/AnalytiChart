@@ -1,18 +1,12 @@
 <?php
-/**
- * Extra_VC_Ajax_AnalyticTable class file.
- *
- * @package    Eos_VC_Ajax
- */
+
+namespace Argo22\AnalyticChart;
 
 /**
- *  Analytic Table
- *  Using datatables library for displaying the data (http://datatables.net).
- *
- * @category   Eos
- * @package    Eos_VC_Ajax
+ * Analytic Table
+ * Using datatables library for displaying the data (http://datatables.net).
  */
-class Extra_VC_Ajax_AnalyticTable extends AbstractChart
+class Table extends ComponentAbstract
 {
 	/**
 	 * Table column keys
@@ -91,7 +85,6 @@ class Extra_VC_Ajax_AnalyticTable extends AbstractChart
 	 * @param  string 						$identifier
 	 * @param  array						$assetsLoad
 	 * @param  array						$sessionLoad
-	 * @return Extra_VC_Ajax_AnalyticTable
 	 */
 	public function __construct($identifier, $assetsLoad, $sessionLoad = array())
 	{
@@ -112,10 +105,10 @@ class Extra_VC_Ajax_AnalyticTable extends AbstractChart
 
 	/**
 	 * Setter for analytic chart identifier. Enable interaction
-	 * with instance of Extra_VC_Ajax_AnalyticChart.
+	 * with instance of \Argo22\AnalyticChart\Chart
 	 *
 	 * @param  string	 				$identifier
-	 * @return Extra_VC_Ajax_AnalyticTable
+	 * @return self
 	 */
 	public function setChartIdentifier($identifier)
 	{
@@ -128,7 +121,7 @@ class Extra_VC_Ajax_AnalyticTable extends AbstractChart
 	 * Setter for start date
 	 *
 	 * @param  \DateTime 				$start
-	 * @return Extra_VC_Ajax_AnalyticTable
+	 * @return self
 	 */
 	public function setStartDate(\DateTime $start)
 	{
@@ -141,7 +134,7 @@ class Extra_VC_Ajax_AnalyticTable extends AbstractChart
 	 * Setter for end date
 	 *
 	 * @param  \DateTime 				$end
-	 * @return Extra_VC_Ajax_AnalyticTable
+	 * @return self
 	 */
 	public function setEndDate(\DateTime $end)
 	{
@@ -163,7 +156,7 @@ class Extra_VC_Ajax_AnalyticTable extends AbstractChart
 	 * )
 	 *
 	 * @param  array 					$dimensions
-	 * @return Extra_VC_Ajax_AnalyticTable
+	 * @return self
 	 */
 	public function setPrimaryDimensions($dimensions)
 	{
@@ -185,7 +178,7 @@ class Extra_VC_Ajax_AnalyticTable extends AbstractChart
 	 * )
 	 *
 	 * @param  array 					$dimensions
-	 * @return Extra_VC_Ajax_AnalyticTable
+	 * @return self
 	 */
 	public function setSecondaryDimensions($dimensions)
 	{
@@ -209,7 +202,7 @@ class Extra_VC_Ajax_AnalyticTable extends AbstractChart
 	 * )
 	 *
 	 * @param  array 					$columns
-	 * @return Extra_VC_Ajax_AnalyticTable
+	 * @return self
 	 */
 	public function setColumns($columns)
 	{
@@ -226,7 +219,7 @@ class Extra_VC_Ajax_AnalyticTable extends AbstractChart
 	 * - array(instance, 'function')
 	 *
 	 * @param  mixed 					$dataSource
-	 * @return Extra_VC_Ajax_AnalyticTable
+	 * @return self
 	 */
 	public function setDataSource($dataSource)
 	{
@@ -405,10 +398,8 @@ class Extra_VC_Ajax_AnalyticTable extends AbstractChart
 		}
 
 		if ($lod) {
-			$startDate = Extra_AnalyticUtils::
-				truncateDate($startDate->format('Y-m-d'), $lod);
-			$endDate = Extra_AnalyticUtils::
-				truncateDate($endDate->format('Y-m-d'), $lod);
+			$startDate = Utils::truncateDate($startDate->format('Y-m-d'), $lod);
+			$endDate = Utils::truncateDate($endDate->format('Y-m-d'), $lod);
 		} else {
 			$startDate = $startDate->format('Y-m-d');
 			$endDate = $endDate->format('Y-m-d');

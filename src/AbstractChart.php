@@ -1,6 +1,8 @@
 <?php
 
-abstract class AbstractChart
+namespace Argo22\AnalyticChart;
+
+abstract class ComponentAbstract
 {
 	protected $_identifier;
 	protected $_defaultProperties = array();

@@ -1,18 +1,12 @@
 <?php
-/**
- * Extra_VC_Ajax_AnalyticChart class file.
- *
- * @package    Eos_VC_Ajax
- */
+
+namespace Argo22\AnalyticChart;
 
 /**
- *  Analytic Chart
- *  Using C3 chart library for displaying the chart data (C3js.org).
- *
- * @category   Eos
- * @package    Eos_VC_Ajax
+ * Analytic Chart
+ * Using C3 chart library for displaying the chart data (C3js.org).
  */
-class Extra_VC_Ajax_AnalyticChart extends AbstractChart
+class Chart extends ComponentAbstract
 {
 	/**
 	 * Chart data keys
@@ -111,7 +105,8 @@ class Extra_VC_Ajax_AnalyticChart extends AbstractChart
 	 * @var array
 	 */
 	private $_lineTypes = array(
-		Extra_VC_Ajax_AnalyticChart::PRIMARY_METRIC_KEY => 'area',
+		//Extra_VC_Ajax_AnalyticChart::PRIMARY_METRIC_KEY => 'area',
+		self::PRIMARY_METRIC_KEY => 'area',
 	);
 
 	/**
@@ -172,7 +167,6 @@ class Extra_VC_Ajax_AnalyticChart extends AbstractChart
 	 * @param  string 						$identifier
 	 * @param  array						$assetsLoad
 	 * @param  array						$sessionLoad
-	 * @return Extra_VC_Ajax_AnalyticChart
 	 */
 	public function __construct($identifier, $assetsLoad, $sessionLoad = array())
 	{
@@ -195,10 +189,10 @@ class Extra_VC_Ajax_AnalyticChart extends AbstractChart
 
 	/**
 	 * Setter for analytic table identifier. Enable interaction
-	 * with instance of Extra_VC_Ajax_AnalyticTable.
+	 * with instance of \Argo22\AnalyticsChart\Table
 	 *
-	 * @param  string	 				$identifier
-	 * @return Extra_VC_Ajax_AnalyticTable
+	 * @param  string $identifier
+	 * @return self
 	 */
 	public function setTableIdentifier($identifier)
 	{
@@ -211,7 +205,7 @@ class Extra_VC_Ajax_AnalyticChart extends AbstractChart
 	 * Setter for start date
 	 *
 	 * @param  \DateTime 				$start
-	 * @return Extra_VC_Ajax_AnalyticChart
+	 * @return self
 	 */
 	public function setStartDate(\DateTime $start)
 	{
@@ -224,7 +218,7 @@ class Extra_VC_Ajax_AnalyticChart extends AbstractChart
 	 * Setter for end date
 	 *
 	 * @param  \DateTime 				$end
-	 * @return Extra_VC_Ajax_AnalyticChart
+	 * @return self
 	 */
 	public function setEndDate(\DateTime $end)
 	{
@@ -254,7 +248,7 @@ class Extra_VC_Ajax_AnalyticChart extends AbstractChart
 	 *
 	 *
 	 * @param  array 					$metrics
-	 * @return Extra_VC_Ajax_AnalyticChart
+	 * @return self
 	 */
 	public function setMetrics($metrics)
 	{
@@ -271,7 +265,7 @@ class Extra_VC_Ajax_AnalyticChart extends AbstractChart
 	 * - array(instance, 'function')
 	 *
 	 * @param  mixed 					$dataSource
-	 * @return Extra_VC_Ajax_AnalyticChart
+	 * @return self
 	 */
 	public function setDataSource($dataSource)
 	{
@@ -299,7 +293,8 @@ class Extra_VC_Ajax_AnalyticChart extends AbstractChart
 	 *  if min(max(dataSetA),max(dataSetB))*_axisSwitchScale < max(max(dataSetA),max(dataSetB))
 	 *		use y2
 	 *
-	 * @param mixed $settings
+	 * @param  mixed $settings
+	 * @return self
 	 */
 	public function setAxisSwitch($settings)
 	{
@@ -308,7 +303,7 @@ class Extra_VC_Ajax_AnalyticChart extends AbstractChart
 			$this->_axisSwitchScale = $settings;
 		} else {
 			if (!in_array($settings, self::axisSwitchArray())) {
-				throw new Extra_InvalidParam("settings");
+				throw new Exception('Invalid parameter value - settings');
 			}
 			$this->_axisSwitchMode = $settings;
 		}
@@ -418,8 +413,8 @@ class Extra_VC_Ajax_AnalyticChart extends AbstractChart
 	/**
 	 * Sets whether Lod picker should be displayed
 	 *
-	 * @param bool $value
-	 * @return $this
+	 * @param  bool $value
+	 * @return self
 	 */
 	public function setShowLod($value = true)
 	{
@@ -431,8 +426,8 @@ class Extra_VC_Ajax_AnalyticChart extends AbstractChart
 	/**
 	 * Sets whether metric picker picker should be displayed
 	 *
-	 * @param bool $value
-	 * @return $this
+	 * @param  bool $value
+	 * @return self
 	 */
 	public function setShowMetricPicker($value = true)
 	{
@@ -444,8 +439,8 @@ class Extra_VC_Ajax_AnalyticChart extends AbstractChart
 	/**
 	 * Sets whether gridlines for Y axe should be displayed
 	 *
-	 * @param bool $value
-	 * @return $this
+	 * @param  bool $value
+	 * @return self
 	 */
 	public function setShowGridLines($value = true)
 	{
@@ -457,8 +452,8 @@ class Extra_VC_Ajax_AnalyticChart extends AbstractChart
 	/**
 	 * Set point size
 	 *
-	 * @param float $value
-	 * @return $this
+	 * @param  float $value
+	 * @return self
 	 */
 	public function setPointSize($value = 2.5)
 	{
@@ -470,8 +465,8 @@ class Extra_VC_Ajax_AnalyticChart extends AbstractChart
 	/**
 	 * Set color pattern
 	 *
-	 * @param array $values
-	 * @return $this
+	 * @param  array $values
+	 * @return self
 	 */
 	public function setColorPattern($values)
 	{
@@ -483,8 +478,8 @@ class Extra_VC_Ajax_AnalyticChart extends AbstractChart
 	/**
 	 * Set regions
 	 *
-	 * @param array $values
-	 * @return $this
+	 * @param  array $values
+	 * @return self
 	 */
 	public function setRegions($values)
 	{
@@ -496,8 +491,8 @@ class Extra_VC_Ajax_AnalyticChart extends AbstractChart
 	/**
 	 * Enable/disable zoom
 	 *
-	 * @param bool $value
-	 * @return $this
+	 * @param  bool $value
+	 * @return self
 	 */
 	public function enableZoom($value = false)
 	{
@@ -519,7 +514,7 @@ class Extra_VC_Ajax_AnalyticChart extends AbstractChart
 
 
 	/**
-	 * Returns true if the given given LOD level is enable
+	 * Returns true if the given given LOD level is enabled
 	 *
 	 * @param  string $level
 	 * @return bool
@@ -534,11 +529,12 @@ class Extra_VC_Ajax_AnalyticChart extends AbstractChart
 
 	/**
 	 * Sets LOD levels
-	 * @param  [type] $hour  [description]
-	 * @param  [type] $day   [description]
-	 * @param  [type] $week  [description]
-	 * @param  [type] $month [description]
-	 * @return [type]        [description]
+	 *
+	 * @param  bool $hour
+	 * @param  bool $day
+	 * @param  bool $week
+	 * @param  bool $month
+	 * @return void
 	 */
 	public function enableLodLevel($hour, $day, $week, $month)
 	{
@@ -561,7 +557,7 @@ class Extra_VC_Ajax_AnalyticChart extends AbstractChart
 	 *
 	 * @param  $metric string
 	 * @param  $type   string e.g. area, line, etc., refer to C3 doc for more
-	 * @return this
+	 * @return self
 	 */
 	public function setLineType($metric, $type)
 	{
@@ -573,7 +569,7 @@ class Extra_VC_Ajax_AnalyticChart extends AbstractChart
 	/**
 	 * Ajax function returns complete data for chart
 	 *
-	 * @return void
+	 * @return array
 	 */
 	private function _loadData($params = array())
 	{
@@ -667,10 +663,10 @@ class Extra_VC_Ajax_AnalyticChart extends AbstractChart
 	/**
 	 * Returns y axis to use for given non-primary metric.
 	 *
-	 * @param array $metric Metric data of tested column
-	 * @param array $primaryMetric Primary metric
-	 * @param array $column Dataset
-	 * @param array $primaryExtremes Min and max values of primary dataset
+	 * @param  array $metric Metric data of tested column
+	 * @param  array $primaryMetric Primary metric
+	 * @param  array $column Dataset
+	 * @param  array $primaryExtremes Min and max values of primary dataset
 	 * @return string
 	 */
 	private function _getYAxis($metric, $primaryMetric, $column, $primaryExtremes)
@@ -729,6 +725,7 @@ class Extra_VC_Ajax_AnalyticChart extends AbstractChart
 	 * Ajax function returns one data column from
 	 * the given Analytic table row data.
 	 *
+	 * @param  array	$params
 	 * @return void
 	 */
 	private function _loadTableRowData($params = array())
@@ -792,8 +789,7 @@ class Extra_VC_Ajax_AnalyticChart extends AbstractChart
 	 * @param  array 	$dimensions
 	 * @return array
 	 */
-	private function _getSourceData($metrics, $lod,
-		$dimensions = array())
+	private function _getSourceData($metrics, $lod, $dimensions = array())
 	{
 		// set start date
 		if (empty($this->_startDate)) {
@@ -810,10 +806,8 @@ class Extra_VC_Ajax_AnalyticChart extends AbstractChart
 			$endDate = $this->_endDate;
 		}
 
-		$start = Extra_AnalyticUtils::
-			truncateDate($startDate->format('Y-m-d'), $lod);
-		$end = Extra_AnalyticUtils::
-			truncateDate($endDate->format('Y-m-d'), $lod);
+		$start = Utils::truncateDate($startDate->format('Y-m-d'), $lod);
+		$end = Utils::truncateDate($endDate->format('Y-m-d'), $lod);
 
 		$params = array(
 			'startDate' => $start,

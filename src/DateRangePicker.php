@@ -1,9 +1,6 @@
 <?php
-/**
- * Extra_VC_Extra_VC_DateRangePicker class file.
- *
- * @package    Extra_VC
- */
+
+namespace Argo22\AnalyticChart;
 
 /**
  * Class for creating date range picker.
@@ -14,11 +11,8 @@
  *	 date('d M y')
  * - If no date entry date format is specified, the default format is
  *	 date('Y/m/d')
- *
- * @category   Extra
- * @package    Extra_VC
  */
-class Extra_VC_DateRangePicker extends AbstractChart
+class DateRangePicker extends ComponentAbstract
 {
 	const RANGE_YESTERDAY = 'YESTERDAY';
 	const RANGE_LAST_SEVEN_DAYS = 'LAST_SEVEN_DAYS';
@@ -150,7 +144,6 @@ class Extra_VC_DateRangePicker extends AbstractChart
 	 * @param  string						$identifier
 	 * @param  array						$assetsLoad
 	 * @param  array						$sessionLoad
-	 * @return Extra_VC_DateRangePicker
 	 */
 	public function __construct($identifier, $assetsLoad, $sessionLoad = array())
 	{
@@ -269,7 +262,7 @@ class Extra_VC_DateRangePicker extends AbstractChart
 	 *
 	 * @param  date $startDate
 	 * @param  date $endDate
-	 * @return Extra_VC_DateRangePicker
+	 * @return self
 	 */
 	public function setDefaultRange($startDate, $endDate)
 	{
@@ -288,7 +281,7 @@ class Extra_VC_DateRangePicker extends AbstractChart
 	 * Sets the maximum date
 	 *
 	 * @param  date $maxDate
-	 * @return Extra_VC_DateRangePicker
+	 * @return self
 	 */
 	public function setMaxDate($maxDate)
 	{
@@ -324,7 +317,7 @@ class Extra_VC_DateRangePicker extends AbstractChart
 	 * Sets the minimum date
 	 *
 	 * @param date $minDate
-	 * @return Extra_VC_DateRangePicker
+	 * @return self
 	 */
 	public function setMinDate($minDate)
 	{
@@ -349,7 +342,7 @@ class Extra_VC_DateRangePicker extends AbstractChart
 	 * Adds a predefined date range
 	 *
 	 * @param  string $predefinedRange
-	 * @return Extra_VC_DateRangePicker
+	 * @return self
 	 */
 	public function addPredefinedRange($predefinedRange)
 	{
@@ -482,7 +475,7 @@ class Extra_VC_DateRangePicker extends AbstractChart
 	 * @param  date $startDate
 	 * @param  date $endDate
 	 * @param  string $label
-	 * @return Extra_VC_DateRangePicker
+	 * @return self
 	 */
 	public function addCustomRange($startDate, $endDate, $label)
 	{
@@ -506,7 +499,7 @@ class Extra_VC_DateRangePicker extends AbstractChart
 	 * Sets the start date
 	 *
 	 * @param  date $startDate
-	 * @return Extra_VC_DateRangePicker
+	 * @return self
 	 */
 	public function setStartDate($startDate)
 	{
@@ -525,7 +518,7 @@ class Extra_VC_DateRangePicker extends AbstractChart
 	 * Sets the end date
 	 *
 	 * @param  date $endDate
-	 * @return Extra_VC_DateRangePicker
+	 * @return self
 	 */
 	public function setEndDate($endDate)
 	{
@@ -576,7 +569,7 @@ class Extra_VC_DateRangePicker extends AbstractChart
 	 * Sets the format of the output date
 	 *
 	 * @param  string $format
-	 * @return Extra_VC_DateRangePicker
+	 * @return self
 	 */
 	public function setOutputDateFormat($format)
 	{
@@ -590,7 +583,7 @@ class Extra_VC_DateRangePicker extends AbstractChart
 	 * Sets the action link
 	 *
 	 * @param  string $link
-	 * @return Extra_VC_DateRangePicker
+	 * @return self
 	 */
 	public function setActionLink($link)
 	{
@@ -618,7 +611,7 @@ class Extra_VC_DateRangePicker extends AbstractChart
 	 * ...
 	 * </code>
 	 *
-	 * @return Extra_VC_DateRangePicker
+	 * @return self
 	 */
 	public function setDateEntryDateFormat($entryFormat, $smartyFormat,
 		$initialField = 2
@@ -818,7 +811,7 @@ class Extra_VC_DateRangePicker extends AbstractChart
 	 * Sets the picking mode
 	 *
 	 * @param  string $mode
-	 * @return Extra_VC_DateRangePicker
+	 * @return self
 	 */
 	public function setMode($mode)
 	{

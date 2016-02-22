@@ -1,18 +1,12 @@
 <?php
-/**
- * Extra_AnalyticUtils class file.
- *
- * @package    Extra
- */
+
+namespace Argo22\AnalyticChart;
 
 /**
- *  Analytic Utils
- *  Holds utility functions for statistics
- *
- * @category   Eos
- * @package    Extra
+ * Analytic Utils
+ * Holds utility functions for statistics
  */
-class Extra_AnalyticUtils
+class Utils
 {
 	/**
 	 * Truncates date to given precision

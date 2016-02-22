@@ -1,18 +1,12 @@
 <?php
-/**
- * Extra_VC_Ajax_AnalyticMetric class file.
- *
- * @package    Eos_VC_Ajax
- */
+
+namespace Argo22\AnalyticChart;
 
 /**
- *  Analytic Metric
- *  Defines analytic metric types used in Analytic chart and table.
- *
- * @category   Eos
- * @package    Eos_VC_Ajax
+ * Analytic Metric
+ * Defines analytic metric types used in Analytic chart and table.
  */
-class Extra_VC_Ajax_AnalyticMetric
+class Metric
 {
 	/**
 	 * Metric types
