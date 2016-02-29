@@ -84,11 +84,11 @@ var analyticTable_{$structure['identifier']|noescape} = $.analyticTable.create({
 		columnDefs: [
 			{foreach $structure['columns'] as $key => $column}
 			{
-				targets: {$iterator->counter + 1},
+				targets: {$iterator->counter + 2},
 				orderSequence: ['desc', 'asc'],
 				createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
 					var formatted = $.metricFormats.formatByType(cellData, {$column['type']});
-					$(cell).addClass('align{ucfirst(strtolower($column['align']))}').html(formatted);
+					$(cell).addClass('align{ucfirst(strtolower($column['align']))|noescape}').html(formatted);
 				}
 			}{if $iterator->counter != count($structure['columns'])},{/if}
 			{/foreach}
