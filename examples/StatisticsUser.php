@@ -2,13 +2,30 @@
 
 namespace App\Services;
 
-class StatisticsUser extends \Nette\Object
+class StatisticsUser extends StatisticsAbstract
 {
-	const USERS_TOTAL = 'USERS_TOTAL';
-	const USERS_ACTIVE = 'USERS_ACTIVE';
+	/** @var \Argo22\Modules\Core\User\Collection **/
+	private $_collection;
+	/** @var \App\Services\GeoIp **/
+	private $_geoIp;
 
-	const DIMENSION_USER = 'users';
-	const DIMENSION_SUBSCRIPTION = 'subscriptions';
+	static private $_dbCache;
+
+	public function __construct(
+		\Argo22\Modules\Core\User\Collection $coll, \App\Services\GeoIp $geo
+	) {
+		$this->_collection = $coll;
+		$this->_geoIp = $geo;
+
+		parent::__construct();
+	}
+
+	const USERS_ACTIVE = 'USERS_ACTIVE';
+	const USERS_TOTAL = 'USERS_TOTAL';
+
+	const DIMENSION_USER_REFERRAL = 'user_referral';
+	const DIMENSION_USER_SOURCE = 'user_source';
+	const DIMENSION_USER_COUNTRY = 'user_country';
 
 	/**
 	 * Returns human readable name for the given $metric
@@ -19,10 +36,10 @@ class StatisticsUser extends \Nette\Object
 	static public function getLabelFor($metric)
 	{
 		switch ($metric) {
-		case self::USERS_TOTAL:
-			return 'total_users_count';
 		case self::USERS_ACTIVE:
-			return 'active_users_count';
+			return 'Active Users count';
+		case self::USERS_TOTAL:
+			return 'Created Accounts count';
 		default:
 			throw new \Exception("Unsupported metric '{$metric}'");
 		}
@@ -38,10 +55,11 @@ class StatisticsUser extends \Nette\Object
 	static public function getDescFor($metric)
 	{
 		switch ($metric) {
-		case self::USERS_TOTAL:
-			return 'Description USERS_TOTAL';
 		case self::USERS_ACTIVE:
-			return 'Description USERS_ACTIVE';
+			return 'Count of users who have successfully completed account '
+				. 'activation';
+		case self::USERS_TOTAL:
+			return 'Count of users who created an account';
 		default:
 			throw new \Exception("Unsupported metric '{$metric}'");
 		}
@@ -57,10 +75,12 @@ class StatisticsUser extends \Nette\Object
 	public static function getLabelForDimension($dimension)
 	{
 		switch ($dimension) {
-		case self::DIMENSION_USER:
-			return 'User';
-		case self::DIMENSION_SUBSCRIPTION:
-			return 'Subscription';
+		case self::DIMENSION_USER_REFERRAL:
+			return 'Referral users';
+		case self::DIMENSION_USER_SOURCE:
+			return 'Source of users';
+		case self::DIMENSION_USER_COUNTRY:
+			return 'Country of origin';
 		default:
 			throw new \Exception("Unsupported dimension '{$dimension}'");
 		}
@@ -68,159 +88,120 @@ class StatisticsUser extends \Nette\Object
 
 
 	/**
-	 * Retrieve data for the Chart component
+	 * Fetch data to display
 	 *
-	 * @param  array	$metrics
-	 * @param  string	$from
-	 * @param  string	$to
-	 * @param  string	$lod
-	 * @param  array	$dimension
-	 * @return array
+	 * @param  \DateTime	$start
+	 * @param  \DateTime	$end
+	 * @param  string|int	$dimension
+	 * @param  string		$metric
+	 * @return float
 	 */
-	static public function getTimeline($metrics, $from, $to, $lod, $dimensions)
-	{
-		$dim = empty($dimensions)
-			? null
-			: reset($dimensions);
-		$labels = array();
-		$data = array();
-		foreach ($metrics as $metric) {
-			$metricData = self::_get($metric, $from, $to, $lod, $dim);
-			if (empty($labels)) {
-				$labels = array_keys($metricData);
-			}
-			$data[$metric] = array_values($metricData);
+	protected function _fetchData($start, $end, $metric, $d1, $d2) {
+		if (is_null(self::$_dbCache)) {
+			$col = clone $this->_collection;
+			$col = $col->getTable();
+			$col->select('inviter_user_id, registration_source')
+				->select('country_code, created, state');
+
+			self::$_dbCache = $col->fetchAssoc('created');
 		}
+		$data = 0;
+		foreach (self::$_dbCache as $record) {
+			if ($record['created'] < $start) {
+				continue;
+			}
+			if ($record['created'] > $end) {
+				break;
+			}
 
-		return array(
-			'labels' => $labels,
-			'columns' => $data,
-		);
-	}
-
-
-	/**
-	 * Retrieve data for the Table component
-	 *
-	 * @param  array	$metrics
-	 * @param  string	$from
-	 * @param  string	$to
-	 * @param  string	$lod
-	 * @param  array	$dimension
-	 * @return array
-	 */
-	static public function getTabular($metrics, $from, $to, $lod, $dimensions,
-		$conditions = array()
-	) {
-		$data = array();
-		do {
-			$dim = (string)reset($dimensions);
-			$dimItems = self::_getDimensionItems($dim);
-			foreach ($dimItems as $item) {
-				$filter = $item
-					? $item['id']
-					: null;
-				$temp = array();
-				foreach ($metrics as $metric) {
-					$metricData = self::_get($metric, $from, $to, $lod, $filter);
-					$temp[$metric] = array_sum(array_values($metricData));
-					if ($item) {
-						$temp[$dim] = $item;
-					}
+			// evaluate record
+			$add = false;
+			switch ($metric) {
+			case self::USERS_ACTIVE:
+				if ($record['state'] === \Argo22\Modules\Core\User\Model::STATE_ACTIVE) {
+					$add = true;
 				}
-				$data[] = $temp;
+				break;
+			case self::USERS_TOTAL:
+				$add = true;
+				break;
 			}
-			if (!empty($dimensions)) {
-				array_shift($dimensions);
+
+			if ($d1) {
+				list($methName, $val) = unserialize($d1);
+				$add = self::$methName($record, $add, $val);
 			}
-		} while (!empty($dimensions));
+			if ($d2) {
+				list($methName, $val) = unserialize($d2);
+				$add = self::$methName($record, $add, $val);
+			}
+
+			$data = $add
+				? $data + 1
+				: $data;
+		}
 
 		return $data;
 	}
 
 
 	/**
-	 * Get metrics data. Utilize the lod settings to retrieve data having
-	 * adequate granularity
+	 * Helper functions to evaluate whether to include the record based on
+	 * expected evaluation result and current evaluation state
 	 *
-	 * @param  string	$metric
-	 * @param  string	$from
-	 * @param  string	$to
-	 * @param  string	$lod
-	 * @param  string	$dimension
-	 * @return array
+	 * @param  \Argo22\Core\DataModel\Model $record
+	 * @param  bool							$current
+	 * @param  string|bool|int				$val
+	 * @return bool
 	 */
-	static protected function _get($metric, $from, $to, $lod, $dimension = '')
-	{
-		static $cache;
-		$toDt = new \DateTime($to);
-
-		// create DateInterval string based on lod
-		$interval = "P";
-		switch ($lod) {
-		case 'hour':
-			$interval .= "T1H";
-			break;
-		case 'day':
-			$interval .= "1D";
-			break;
-		case 'week':
-			$interval .= "1W";
-			break;
-		case 'month':
-			$interval .= "1M";
-			break;
+	static private function _hasInviter($record, $current, $val){
+		if ($current === false) {
+			return false;
 		}
-		// utilize cache if present
-		if (isset($cache["$metric$from$to$lod$dimension"])) {
-			return $cache["$metric$from$to$lod$dimension"];
+		if ($val === ($record['inviter_user_id'] === null)) {
+			return true;
 		}
-		// or harvest the data if not cached
-		$token = new \DateTime($from);
-		$data = array();
-		while ($token < $toDt) {
-			$data[$token->format('Y-m-d H:i:s')]
-				= self::_fetchData($token, $dimension, $metric);
-			$token->add(new \DateInterval($interval));
-		}
-		// cache harvested data
-		return $cache["$metric$from$to$lod$dimension"] = $data;
+		return false;
 	}
 
 
 	/**
-	 * Fetch data to display
+	 * Helper functions to evaluate whether to include the record based on
+	 * expected evaluation result and current evaluation state
 	 *
-	 * @param  \DateTime	$seed
-	 * @param  string|int	$dimension
-	 * @param  string		$metric
-	 * @return float
+	 * @param  \Argo22\Core\DataModel\Model $record
+	 * @param  bool							$current
+	 * @param  string|bool|int				$val
+	 * @return bool
 	 */
-	static protected function _fetchData($seed, $filter, $metric) {
-		$y = (int)$seed->format('y');
-		$m = (int)$seed->format('m');
-		$d = (int)$seed->format('d');
-		$h = (int)$seed->format('h');
-
-		$determinable = $y + $m + $d + $h;
-		$return = $determinable % 2 === 1
-			? (int)$determinable / 2
-			: $determinable;
-
-		$metric = $metric === 'USERS_TOTAL'
-			? 1
-			: 0.5;
-
-		switch ($filter) {
-		case 1:
-			return 60*$return/100*$metric;
-		case 2:
-			return 40*$return/100*$metric;
-		default:
-			return $return*$metric;
+	static private function _hasSource($record, $current, $val){
+		if ($current === false) {
+			return false;
 		}
+		if ($record['registration_source'] === $val) {
+			return true;
+		}
+		return false;
+	}
 
-		throw new \Exception('What the heck happened?');
+
+	/**
+	 * Helper functions to evaluate whether to include the record based on
+	 * expected evaluation result and current evaluation state
+	 *
+	 * @param  \Argo22\Core\DataModel\Model $record
+	 * @param  bool							$current
+	 * @param  string|bool|int				$val
+	 * @return bool
+	 */
+	static private function _hasCountry($record, $current, $val){
+		if ($current === false) {
+			return false;
+		}
+		if ($record['country_code'] === $val) {
+			return true;
+		}
+		return false;
 	}
 
 
@@ -230,15 +211,79 @@ class StatisticsUser extends \Nette\Object
 	 * @param  string|bool	$dimension
 	 * @return array
 	 */
-	static protected function _getDimensionItems($dimension = false) {
+	protected function _getDimensionItems($dimension = false) {
 		if (!$dimension) {
 			return array(null);
 		}
+		switch ($dimension) {
+		case self::DIMENSION_USER_REFERRAL:
+			return array(
+				array(
+					'id' => serialize(array('_hasInviter', true)),
+					'value' => 'Invited users',
+				),
+				array(
+					'id' => serialize(array('_hasInviter', false)),
+					'value' => 'Non-invited users',
+				),
+			);
+		case self::DIMENSION_USER_SOURCE:
+			return array(
+				array(
+					'id' => serialize(array(
+						'_hasSource',
+						\App\Models\User\Model::SOURCE_APP
+					)),
+					'value' => 'Mobile App',
+				),
+				array(
+					'id' => serialize(array(
+						'_hasSource',
+						\App\Models\User\Model::SOURCE_WEB
+					)),
+					'value' => 'Microsite',
+				),
+			);
+		case self::DIMENSION_USER_COUNTRY:
+			$return = array();
+			foreach ($this->_getCountries() as $countryCode) {
+				if ($countryCode == '') {
+					$return[] = array(
+						'id' => serialize(array(
+							'_hasCountry',
+							null
+						)),
+						'value' => 'Unknown',
+					);
+					continue;
+				}
+				$return[] = array(
+					'id' => serialize(array(
+						'_hasCountry',
+						$countryCode
+					)),
+					'value'
+						=> $this->_geoIp->getCountryNameForIsoCode($countryCode),
+				);
+			}
 
-		// get individual items for given dimension. from DB perhaps
-		return array(
-			['id' => 1, 'value' => 'Item no 1!'],
-			['id' => 2, 'value' => 'Item no 2!']
-		);
+			return $return;
+		}
+	}
+
+
+	/**
+	 * Get available user country codes which to select from
+	 *
+	 * @return array
+	 */
+	private function _getCountries() {
+
+		$c = clone $this->_collection;
+		$ctr = $c->getTable()
+			->select('country_code')
+			->group('country_code');
+
+		return array_keys($ctr->fetchAssoc('country_code'));
 	}
 }

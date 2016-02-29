@@ -14,17 +14,21 @@ class TestPresenter extends \Argo22\Core\Presenters\BasePresenter
 
 	/**
 	 * Metrics available for each action
+	 * CHART - available metrics for selection
+	 *
 	 * @var array
 	 */
 	private $_metrics = array(
 		'users' => array(
-			\App\Services\StatisticsUser::USERS_TOTAL,
 			\App\Services\StatisticsUser::USERS_ACTIVE,
+			\App\Services\StatisticsUser::USERS_TOTAL,
 		),
 	);
 
 	/**
 	 * Custom (=other than absolute) types for metrics
+	 * TODO
+	 *
 	 * @var array
 	 */
 	private $_metricType = array(
@@ -34,44 +38,56 @@ class TestPresenter extends \Argo22\Core\Presenters\BasePresenter
 
 	/**
 	 * List of associated array metrics
+	 * CHART - introduce fixed chart secondary metric
+	 * TODO: example - leave it there?
+	 *
 	 * @var array
 	 */
-	private $_shadow = array();
+	private $_shadow = array(
+		\App\Services\StatisticsUser::USERS_ACTIVE =>
+			\App\Services\StatisticsUser::USERS_TOTAL,
+	);
 
 	/**
 	 * Dimensions available for each action
+	 * TABLE - changes table rows contents
+	 *
 	 * @var array
 	 */
 	private $_dimensions = array(
 		'users' => array(
-			\App\Services\StatisticsUser::DIMENSION_USER,
+			\App\Services\StatisticsUser::DIMENSION_USER_REFERRAL,
+			\App\Services\StatisticsUser::DIMENSION_USER_SOURCE,
+			\App\Services\StatisticsUser::DIMENSION_USER_COUNTRY,
 		),
 	);
 
 	/**
 	 * Custom dispalying of average value for metrics (default TRUE)
+	 * TABLE - display row values average on table TH
 	 * @var array
 	 */
-	private $_metricDisplayAverage = array();
-
-	/**
-	 * Constants for statistics
-	 */
-	const ONE_DAY = 1;
-	const TWO_DAYS = 2;
-	const ONE_WEEK = 7;
-	const TWO_WEEKS = 14;
-	const ONE_MONTH = 30;
-	const TWO_MONTHS = 60;
+	private $_metricDisplayAverage = array(
+#		\App\Services\StatisticsUser::USERS_ACTIVE => false,
+	);
 
 	/**
 	 * Actions definitions used for menu
 	 * @var array
 	 */
 	private $_actions = array(
-		'users' => 'All registered users',
+		'users' => 'Users',
 	);
 
+
+	/**
+	 * Debug method for logging issued DB queries. Useful for debugging API
+	 */
+	public function logQuery(\Nette\Database\Connection $connection, $result) {
+		$soubor = fopen("../log/queryLog", "a");
+		fwrite($soubor, date('Y-m-d H:i:s') . ": " .$result->getQueryString() . "\n");
+		fclose($soubor);
+	}
 	/**
 	 * Default dashboard action
 	 *
@@ -79,11 +95,15 @@ class TestPresenter extends \Argo22\Core\Presenters\BasePresenter
 	 */
 	public function actionDefault()
 	{
+		// Uncomment these lines to start logging DB queries
+	#	$this->getContext()->getByType('\Nette\Database\Connection')
+	#		->onQuery[] = array($this, 'logQuery');
+
 		// init chart
 		$firstAction = current(array_keys($this->_actions)) . 'Action';
 		$vcInstance = $this->$firstAction();
 
-		// fetch chart data in case of AJAX request
+		// grab fetch chart data in case of AJAX request
 		$format = $this->getParameter('format');
 		if (!empty($format) && $format === 'json') {
 
@@ -256,8 +276,8 @@ class TestPresenter extends \Argo22\Core\Presenters\BasePresenter
 			$this->_sessionLoader($componentName)
 		);
 
-		// TODO:temporary - adjust based on data granularity
-		$chart->enableLodLevel(1,1,1,1);
+		// adjust based on data granularity
+		$chart->enableLodLevel(0,1,1,1);
 
 		// we will use same axis for both metrics, if the secondary metric's
 		// values are at max 6 times greater than primary ones
@@ -427,7 +447,9 @@ class TestPresenter extends \Argo22\Core\Presenters\BasePresenter
 	static public function userGraphSource($params)
 	{
 		$lodMapping = Chart::getLodMapping();
-		return \App\Services\StatisticsUser::getTimeline(
+
+		$stats = \App\Services\StatisticsUser::getInstance();
+		return $stats->getTimeline(
 			$params['metrics'],
 			$params['startDate'],
 			$params['endDate'],
@@ -446,7 +468,9 @@ class TestPresenter extends \Argo22\Core\Presenters\BasePresenter
 	static public function userTableSource($params)
 	{
 		$lodMapping = Table::getLodMapping();
-		return \App\Services\StatisticsUser::getTabular(
+
+		$stats = \App\Services\StatisticsUser::getInstance();
+		return $stats->getTabular(
 			$params['metrics'],
 			$params['startDate'],
 			$params['endDate'],
