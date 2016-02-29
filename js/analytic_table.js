@@ -64,7 +64,7 @@
 			$('.secondaryDimensionButton', this.container).on('click', function() {
 				var dropdown = $(this).siblings('.selectDropdown');
 				if ($('.secondaryDimension select', this.container).val() != '') {
-					$(this).html('Sekundární dimenze<i class="fa fa-chevron-down">&nbsp;</i>');
+					$(this).html('Secondary dimension<i class="fa fa-chevron-down">&nbsp;</i>');
 					$('dd a .value:contains("")', dropdown).trigger('click');
 				} else {
 					dropdown.show();
@@ -78,7 +78,7 @@
 				var dropdown = $(this).siblings('.selectDropdown');
 				dropdown.hide();
 				if ($(this).val() == '') {
-					var text = 'Sekundární dimenze<i class="fa fa-chevron-down">&nbsp;</i>';
+					var text = 'Secondary dimension<i class="fa fa-chevron-down">&nbsp;</i>';
 				} else {
 					var text = $('option:selected', this).text() + '<i class="fa fa-times">&nbsp;</i>';
 				}
@@ -121,7 +121,7 @@
 				data.lod = that.chart._getLod();
 			};
 
-			data[that.primary_dimension_key] = $('.primaryDimension li.selected', that.container).data('value');;
+			data[that.primary_dimension_key] = $('.primaryDimension li.selected', that.container).data('value');
 			data[that.secondary_dimension_key] = that.secondary_dimension.val();
 
 			Manager.ajax({
