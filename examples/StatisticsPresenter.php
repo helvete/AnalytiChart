@@ -7,10 +7,14 @@ use \Argo22\AnalyticChart\DateRangePicker;
 use \Argo22\AnalyticChart\Chart;
 use \Argo22\AnalyticChart\Table;
 
-class TestPresenter extends \Argo22\Core\Presenters\BasePresenter
+class StatisticsPresenter extends \Argo22\Core\Presenters\BasePresenter
 {
 	/** @var \App\Services\StatisticsUser @inject */
 	var $userStatistics;
+	/** @var \App\Services\StatisticsMagazineIssue @inject */
+	var $miStatistics;
+	/** @var \App\Services\StatisticsSubscription @inject */
+	var $subsStatistics;
 
 	/**
 	 * Metrics available for each action
@@ -23,11 +27,18 @@ class TestPresenter extends \Argo22\Core\Presenters\BasePresenter
 			\App\Services\StatisticsUser::USERS_ACTIVE,
 			\App\Services\StatisticsUser::USERS_TOTAL,
 		),
+		'magissue' => array(
+			\App\Services\StatisticsMagazineIssue::ISSUES_READ,
+			\App\Services\StatisticsMagazineIssue::ISSUES_DOWNLOADED,
+		),
+		'subs' => array(
+			\App\Services\StatisticsSubscription::SUBSCRIPTIONS_NEW,
+		),
 	);
 
 	/**
 	 * Custom (=other than absolute) types for metrics
-	 * TODO
+	 * TABLE - metric type to append '%' or so in the table
 	 *
 	 * @var array
 	 */
@@ -35,11 +46,9 @@ class TestPresenter extends \Argo22\Core\Presenters\BasePresenter
 		'count' => Metric::RELATIVE,
 	);
 
-
 	/**
 	 * List of associated array metrics
 	 * CHART - introduce fixed chart secondary metric
-	 * TODO: example - leave it there?
 	 *
 	 * @var array
 	 */
@@ -50,7 +59,7 @@ class TestPresenter extends \Argo22\Core\Presenters\BasePresenter
 
 	/**
 	 * Dimensions available for each action
-	 * TABLE - changes table rows contents
+	 * TABLE - array of available dimensions for chart view
 	 *
 	 * @var array
 	 */
@@ -60,15 +69,28 @@ class TestPresenter extends \Argo22\Core\Presenters\BasePresenter
 			\App\Services\StatisticsUser::DIMENSION_USER_SOURCE,
 			\App\Services\StatisticsUser::DIMENSION_USER_COUNTRY,
 		),
+		'magissue' => array(
+			\App\Services\StatisticsMagazineIssue::DIMENSION_MI_DEVICE,
+			\App\Services\StatisticsMagazineIssue::DIMENSION_MI_COUNTRY,
+			\App\Services\StatisticsMagazineIssue::DIMENSION_MI_SUBSCRIPTION,
+			\App\Services\StatisticsMagazineIssue::DIMENSION_MI_MAGAZINE,
+			\App\Services\StatisticsMagazineIssue::DIMENSION_MI_MAGAZINE_ISSUE,
+		),
+		'subs' => array(
+			\App\Services\StatisticsSubscription::DIMENSION_SUBS_DEVICE,
+			\App\Services\StatisticsSubscription::DIMENSION_SUBS_COUNTRY,
+			\App\Services\StatisticsSubscription::DIMENSION_SUBS_SUBSCRIPTION,
+		),
 	);
 
 	/**
-	 * Custom dispalying of average value for metrics (default TRUE)
+	 * Custom displaying of average value for metrics (default TRUE)
 	 * TABLE - display row values average on table TH
+	 *
 	 * @var array
 	 */
 	private $_metricDisplayAverage = array(
-#		\App\Services\StatisticsUser::USERS_ACTIVE => false,
+		//\App\Services\StatisticsUser::USERS_ACTIVE => false,
 	);
 
 	/**
@@ -77,30 +99,39 @@ class TestPresenter extends \Argo22\Core\Presenters\BasePresenter
 	 */
 	private $_actions = array(
 		'users' => 'Users',
+		'magissue' => 'Magazine issues',
+		'subs' => 'Subscriptions',
 	);
 
-
-	/**
-	 * Debug method for logging issued DB queries. Useful for debugging API
-	 */
-	public function logQuery(\Nette\Database\Connection $connection, $result) {
-		$soubor = fopen("../log/queryLog", "a");
-		fwrite($soubor, date('Y-m-d H:i:s') . ": " .$result->getQueryString() . "\n");
-		fclose($soubor);
+	public function actionUsers()
+	{
+		$this->actionDefault('users');
 	}
+	public function actionMagissue()
+	{
+		$this->actionDefault('magissue');
+	}
+	public function actionSubs()
+	{
+		$this->actionDefault('subs');
+	}
+
 	/**
 	 * Default dashboard action
 	 *
+	 * @param  string	$id
 	 * @return void
 	 */
-	public function actionDefault()
+	public function actionDefault($id = false)
 	{
-		// Uncomment these lines to start logging DB queries
-	#	$this->getContext()->getByType('\Nette\Database\Connection')
-	#		->onQuery[] = array($this, 'logQuery');
-
+		// force the same template for all statistics sections
+		$this->template->setFile(WWW_DIR
+			.'/../app/presenters/templates/Statistics/default.latte'
+		);
 		// init chart
-		$firstAction = current(array_keys($this->_actions)) . 'Action';
+		$firstAction = $id === false
+			? current(array_keys($this->_actions)) . 'Action'
+			: "{$id}Action";
 		$vcInstance = $this->$firstAction();
 
 		// grab fetch chart data in case of AJAX request
@@ -186,18 +217,30 @@ class TestPresenter extends \Argo22\Core\Presenters\BasePresenter
 			// remove prefix
 			$id = substr($id, strlen('initComponent_'));
 
-			$isUser = substr($id, 0, strlen('user')) === 'user';
-#			$isContract =
-#				substr($id, 0, strlen('contract')) === 'contract';
+			$isUser = substr($id, 0, strlen('users')) === 'users';
+			$isIssue = substr($id, 0, strlen('magissue')) === 'magissue';
+			$isSubs = substr($id, 0, strlen('subs')) === 'subs';
 
-			if ( ! ($isUser)) { // || $isContract)) {
+			if ( ! ($isUser || $isIssue || $isSubs)) {
 				throw new \Exception('guardina');
 				break;
 			}
 
 			$target = "_build{$type}";
+			$token = '';
+			switch (true) {
+			case $isUser:
+				$token = 'user';
+				break;
+			case $isIssue:
+				$token = 'magazineIssue';
+				break;
+			case $isSubs:
+				$token = 'subscription';
+				break;
+			}
 
-			return $this->$target($isUser ? 'user' : 'user'/*TODO*/, $id);
+			return $this->$target($token, $id);
 
 			// just to be consistent
 			break;
@@ -333,7 +376,6 @@ class TestPresenter extends \Argo22\Core\Presenters\BasePresenter
 	private function _buildTable($source, $id)
 	{
 		$componentName = "{$id}Table";
-
 		$sourceClass = '\App\Services\Statistics' . ucfirst($source);
 
 		$table = new Table(
@@ -345,38 +387,21 @@ class TestPresenter extends \Argo22\Core\Presenters\BasePresenter
 		// set relation with analytic chart component
 		$table->setChartIdentifier("{$id}Chart");
 
-		$primaryDimensions = array();
-
+		$primaryDimensions = $secondaryDimensions = array();
 		foreach ($this->_dimensions[$id] as $dimension) {
 			$primaryDimensions[$dimension] = array(
 				'caption' =>
 					$sourceClass::getLabelForDimension($dimension),
 			);
+			$secondaryDimensions[$dimension] = array(
+				'caption' =>
+					$sourceClass::getLabelForDimension($dimension),
+			);
 		}
-
-		$secondaryDimensions = array();
-
-		foreach ($this->_dimensions as $dimensionsForAction) {
-			foreach ($dimensionsForAction as $dimension) {
-				$secondaryDimensions[$dimension] = array(
-					'caption' =>
-						$sourceClass::getLabelForDimension($dimension),
-				);
-			}
-		}
-
-#		// unset dimensions not available for this source type
-#		if ($source === 'lead') {
-#			unset($secondaryDimensions[Eos_Statistics_Contract::DIMENSION_DISTRIBUTION]);
-#		} else {
-#			unset($secondaryDimensions[Eos_Statistics_Lead::DIMENSION_SAVINGS_BIN]);
-#		}
-
 		$table->setPrimaryDimensions($primaryDimensions);
 		$table->setSecondaryDimensions($secondaryDimensions);
 
 		$columns = array();
-
 		foreach ($this->_metrics[$id] as $metric) {
 			$type = isset($this->_metricType[$metric])
 				? $this->_metricType[$metric]
@@ -446,16 +471,7 @@ class TestPresenter extends \Argo22\Core\Presenters\BasePresenter
 	 */
 	static public function userGraphSource($params)
 	{
-		$lodMapping = Chart::getLodMapping();
-
-		$stats = \App\Services\StatisticsUser::getInstance();
-		return $stats->getTimeline(
-			$params['metrics'],
-			$params['startDate'],
-			$params['endDate'],
-			array_search($lodMapping[$params['lod']], $lodMapping),
-			$params['dimensions']
-		);
+		return self::_loadData($params, 'User', 'getTimeline');
 	}
 
 
@@ -467,10 +483,71 @@ class TestPresenter extends \Argo22\Core\Presenters\BasePresenter
 	 */
 	static public function userTableSource($params)
 	{
-		$lodMapping = Table::getLodMapping();
+		return self::_loadData($params, 'User', 'getTabular');
+	}
 
-		$stats = \App\Services\StatisticsUser::getInstance();
-		return $stats->getTabular(
+
+	/**
+	 * Callback target for magazine issue graph
+	 *
+	 * @param  array $params
+	 * @return array
+	 */
+	static public function magazineIssueGraphSource($params)
+	{
+		return self::_loadData($params, 'MagazineIssue', 'getTimeline');
+	}
+
+
+	/**
+	 * Callback target for magazine issue table
+	 *
+	 * @param  array $params
+	 * @return array
+	 */
+	static public function magazineIssueTableSource($params)
+	{
+		return self::_loadData($params, 'MagazineIssue', 'getTabular');
+	}
+
+
+	/**
+	 * Callback target for subscriptions graph
+	 *
+	 * @param  array $params
+	 * @return array
+	 */
+	static public function subscriptionGraphSource($params)
+	{
+		return self::_loadData($params, 'Subscription', 'getTimeline');
+	}
+
+
+	/**
+	 * Callback target for subscriptions table
+	 *
+	 * @param  array $params
+	 * @return array
+	 */
+	static public function subscriptionTableSource($params)
+	{
+		return self::_loadData($params, 'Subscription', 'getTabular');
+	}
+
+
+	/**
+	 * Automate data loading
+	 *
+	 * @param  array $params
+	 * @return array
+	 */
+	static private function _loadData($params, $clSubName, $methName)
+	{
+		$className = "\App\Services\Statistics$clSubName";
+		$stats = $className::getInstance(lcfirst($clSubName));
+		$lodMapping = Chart::getLodMapping();
+
+		return $stats->$methName(
 			$params['metrics'],
 			$params['startDate'],
 			$params['endDate'],

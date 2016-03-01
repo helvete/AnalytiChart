@@ -5,17 +5,19 @@ namespace App\Services;
 class StatisticsAbstract extends \Nette\Object
 {
 	/**
- 	 * Instance holder
- 	 * @var self
- 	 */
+	 * Instance holder
+	 * @var self
+	 */
 	static private $_instance;
 
 	/**
- 	 * Class construct
- 	 * Store new instance
- 	 */
- 	public function __construct() {
-		self::$_instance = $this;
+	 * Class construct
+	 * Store new instance
+	 *
+	 * @param  string	$name
+	 */
+	public function __construct($name) {
+		self::$_instance[$name] = $this;
 	}
 
 	/**
@@ -163,14 +165,35 @@ class StatisticsAbstract extends \Nette\Object
 
 
 	/**
- 	 * Get statistics class instance.
- 	 * Singleton pattern utilised in order to be able to feed chart/table
- 	 * data source callback
- 	 *
- 	 * @return self
- 	 */
-	static public function getInstance()
+	 * Get statistics class instance.
+	 * Singleton pattern utilised in order to be able to feed chart/table
+	 * data source callback
+	 *
+	 * @param  string	$name
+	 * @return self
+	 */
+	static public function getInstance($name)
 	{
-		return self::$_instance;
+		return self::$_instance[$name];
+	}
+
+
+	/**
+	 * Callback value evaluation. For dimensions usage
+	 *
+	 * @param  bool		$current
+	 * @param  mixed	$actual
+	 * @param  mixed	$expected
+	 * @return bool
+	 */
+	static protected function _evalVal($current, $actual, $expected) {
+		if ($current === false) {
+			return false;
+		}
+		if ($actual === $expected) {
+			return true;
+		}
+
+		return false;
 	}
 }

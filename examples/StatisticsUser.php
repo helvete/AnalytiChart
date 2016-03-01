@@ -17,7 +17,7 @@ class StatisticsUser extends StatisticsAbstract
 		$this->_collection = $coll;
 		$this->_geoIp = $geo;
 
-		parent::__construct();
+		parent::__construct('user');
 	}
 
 	const USERS_ACTIVE = 'USERS_ACTIVE';
@@ -101,7 +101,8 @@ class StatisticsUser extends StatisticsAbstract
 			$col = clone $this->_collection;
 			$col = $col->getTable();
 			$col->select('inviter_user_id, registration_source')
-				->select('country_code, created, state');
+				->select('country_code, created, state')
+				->order("created ASC");
 
 			self::$_dbCache = $col->fetchAssoc('created');
 		}
@@ -279,11 +280,15 @@ class StatisticsUser extends StatisticsAbstract
 	 */
 	private function _getCountries() {
 
-		$c = clone $this->_collection;
-		$ctr = $c->getTable()
-			->select('country_code')
-			->group('country_code');
+		static $cache;
+		if (is_null($cache)) {
+			$c = clone $this->_collection;
+			$ctr = $c->getTable()
+				->select('country_code')
+				->group('country_code');
+			$cache = array_keys($ctr->fetchAssoc('country_code'));
+		}
 
-		return array_keys($ctr->fetchAssoc('country_code'));
+		return $cache;
 	}
 }
