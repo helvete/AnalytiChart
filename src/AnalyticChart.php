@@ -105,7 +105,6 @@ class Chart extends ComponentAbstract
 	 * @var array
 	 */
 	private $_lineTypes = array(
-		//Extra_VC_Ajax_AnalyticChart::PRIMARY_METRIC_KEY => 'area',
 		self::PRIMARY_METRIC_KEY => 'area',
 	);
 

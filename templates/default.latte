@@ -11,7 +11,7 @@
 <div class="tabControl clearfix">
 	<ul class="tabs">
 		{foreach $menu as $key => $label}
-			<li{if $key === $activeMenuItem} class="active"{/if}><a href="{*TODO: link*}">{$label}</a></li>
+			<li{if $key === $activeMenuItem} class="active"{/if}><a href="{$key}">{$label}</a></li>
 		{/foreach}
 	</ul>
 </div>
