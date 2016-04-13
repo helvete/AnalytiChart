@@ -1,7 +1,16 @@
 <?php
 
-namespace App\Services;
+namespace Argo22\AnalyticChart;
 
+/**
+ * Data harvestor class abstract. Fetch data to visualize and format them for
+ * the chart library.
+ * Extend this class and implement self::_fetchData() and self::_getDimensionItems()
+ * 	to provide data and dimensions
+ *
+ * self::getTimeline() and self::getTabular() are called in callback of chart
+ * initialization to provide the data.
+ */
 class StatisticsAbstract extends \Nette\Object
 {
 	/**
@@ -195,5 +204,35 @@ class StatisticsAbstract extends \Nette\Object
 		}
 
 		return false;
+	}
+
+
+	/**
+	 * Fetch data to display
+	 *
+	 * @param  \DateTime	$start
+	 * @param  \DateTime	$end
+	 * @param  string		$metric
+	 * @param  string|int	$dim1
+	 * @param  string|int	$dim2
+	 * @return float
+	 */
+	protected function _fetchData($start, $end, $metric, $dim1, $dim2) {
+		// override this method in target statistics class to harvest data for
+		// visualization
+		throw new \Exception('Statistics: Data retrieval method missing!');
+	}
+
+
+	/**
+	 * Get dimension items. Each of these items represents a table row
+	 *
+	 * @param  string|bool	$dimension
+	 * @return array
+	 */
+	protected function _getDimensionItems($dimension = false) {
+		// override this method in target statistics class to prepare dimensions
+		// for comparison
+		throw new \Exception('Statistics: Dimension definition method missing!');
 	}
 }
