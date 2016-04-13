@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-class StatisticsMagazineIssue extends StatisticsAbstract
+class StatisticsMagazineIssue extends \Argo22\AnalyticChart\StatisticsAbstract
 {
 	/** @var \App\Models\StatMagazineIssueRead\Collection **/
 	private $_statRead;
@@ -22,7 +22,7 @@ class StatisticsMagazineIssue extends StatisticsAbstract
 	public function __construct(
 		\App\Models\StatMagazineIssueRead\Collection $collRead,
 		\App\Models\StatMagazineIssueDownload\Collection $collDown,
-		\App\Services\GeoIp $geo
+		\Argo22\Modules\Core\Api\GeoIp $geo
 	) {
 		$this->_statRead = $collRead;
 		$this->_statDownload = $collDown;

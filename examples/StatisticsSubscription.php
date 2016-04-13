@@ -2,18 +2,18 @@
 
 namespace App\Services;
 
-class StatisticsSubscription extends StatisticsAbstract
+class StatisticsSubscription extends \Argo22\AnalyticChart\StatisticsAbstract
 {
 	/** @var \App\Services\GeoIp **/
 	private $_geoIp;
 	/** @var \App\Models\Subscription\Collection @inject **/
 	var $subscriptions;
-	/** @var \App\Models\UserSubscription\Collection @inject **/
+	/** @var \App\Models\AccountSubscription\Collection @inject **/
 	var $uhs;
 
 	static private $_dbCache;
 
-	public function __construct(\App\Services\GeoIp $geo) {
+	public function __construct(\Argo22\Modules\Core\Api\GeoIp $geo) {
 		$this->_geoIp = $geo;
 
 		parent::__construct('subscription');
@@ -93,8 +93,8 @@ class StatisticsSubscription extends StatisticsAbstract
 		if (!isset(self::$_dbCache[$metric])) {
 			$col = clone $this->uhs;
 			$col = $col->getTable();
-			$col->select('start_date, user_id, is_apple, user_subscription.id')
-				->select('country_code')
+			$col->select('start_date, account_id, is_apple')
+				->select('country_code, account_subscription.id')
 				->select('subscription.code AS code')
 				->order('start_date ASC');
 

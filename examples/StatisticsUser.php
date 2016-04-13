@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-class StatisticsUser extends StatisticsAbstract
+class StatisticsUser extends \Argo22\AnalyticChart\StatisticsAbstract
 {
-	/** @var \Argo22\Modules\Core\User\Collection **/
+	/** @var \Argo22\Modules\Core\Api\Account\Model **/
 	private $_collection;
 	/** @var \App\Services\GeoIp **/
 	private $_geoIp;
@@ -12,7 +12,8 @@ class StatisticsUser extends StatisticsAbstract
 	static private $_dbCache;
 
 	public function __construct(
-		\Argo22\Modules\Core\User\Collection $coll, \App\Services\GeoIp $geo
+		\Argo22\Modules\Core\Api\Account\Collection $coll,
+		\Argo22\Modules\Core\Api\GeoIp $geo
 	) {
 		$this->_collection = $coll;
 		$this->_geoIp = $geo;
@@ -100,7 +101,7 @@ class StatisticsUser extends StatisticsAbstract
 		if (is_null(self::$_dbCache)) {
 			$col = clone $this->_collection;
 			$col = $col->getTable();
-			$col->select('inviter_user_id, registration_source')
+			$col->select('inviter_account_id, registration_source')
 				->select('country_code, created, state')
 				->order("created ASC");
 
@@ -119,7 +120,9 @@ class StatisticsUser extends StatisticsAbstract
 			$add = false;
 			switch ($metric) {
 			case self::USERS_ACTIVE:
-				if ($record['state'] === \Argo22\Modules\Core\User\Model::STATE_ACTIVE) {
+				if ($record['state']
+					=== \Argo22\Modules\Core\Api\Account\Model::STATE_ACTIVE
+				) {
 					$add = true;
 				}
 				break;
@@ -159,7 +162,7 @@ class StatisticsUser extends StatisticsAbstract
 		if ($current === false) {
 			return false;
 		}
-		if ($val === ($record['inviter_user_id'] === null)) {
+		if ($val === ($record['inviter_account_id'] === null)) {
 			return true;
 		}
 		return false;
@@ -233,14 +236,14 @@ class StatisticsUser extends StatisticsAbstract
 				array(
 					'id' => serialize(array(
 						'_hasSource',
-						\App\Models\User\Model::SOURCE_APP
+						\Argo22\Modules\Core\Api\Account\Model::SOURCE_APP
 					)),
 					'value' => 'Mobile App',
 				),
 				array(
 					'id' => serialize(array(
 						'_hasSource',
-						\App\Models\User\Model::SOURCE_WEB
+						\Argo22\Modules\Core\Api\Account\Model::SOURCE_WEB
 					)),
 					'value' => 'Microsite',
 				),
