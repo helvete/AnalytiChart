@@ -160,14 +160,17 @@ class StatisticsAbstract extends \Nette\Object
 		// or harvest the data if not cached
 		$token = new \DateTime($from);
 		$data = array();
-		while ($token < $toDt) {
+
+		// process at least once; because of one week intervals having month LOD
+		do {
 			$end = clone $token;
 			$end->add(new \DateInterval($interval));
 
 			$data[$token->format('Y-m-d H:i:s')]
 				= $this->_fetchData($token, $end, $metric, $d1, $d2);
 			$token = $end;
-		}
+		} while ($token < $toDt);
+
 		// cache harvested data
 		return $cache["$metric$from$to$lod$d1$d2"] = $data;
 	}
